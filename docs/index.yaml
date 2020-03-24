@@ -1,0 +1,14 @@
+apiVersion: v1
+entries:
+  jellyfin:
+  - apiVersion: v2
+    appVersion: 10.5.2
+    created: "2020-03-25T00:44:36.357746+01:00"
+    description: The Free Software Media System
+    digest: 70b85d63f3c821e0fc32bf52300d67fdb3f9d65a78e1c83a89401fe5f66a7b84
+    name: jellyfin
+    type: application
+    urls:
+    - jellyfin-0.1.0.tgz
+    version: 0.1.0
+generated: "2020-03-25T00:44:36.356971+01:00"
