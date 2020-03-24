@@ -1,0 +1,31 @@
+{{- if .Values.persistance.cache.enabled }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: "{{ include "jellyfin.fullname" . }}-cache"
+  labels:
+        {{- include "jellyfin.labels" . | nindent 4 }}
+spec:
+  accessModes:
+    - {{ .Values.persistance.cache.accessMode }}
+  storageClassName: {{ .Values.persistance.cache.storageClass }}
+  resources:
+    requests:
+      storage: {{ .Values.persistance.cache.storageSize }}
+---
+{{- end }}
+{{- if .Values.persistance.config.enabled }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: "{{ include "jellyfin.fullname" . }}-config"
+  labels:
+        {{- include "jellyfin.labels" . | nindent 4 }}
+spec:
+  accessModes:
+    - {{ .Values.persistance.config.accessMode }}
+  storageClassName: {{ .Values.persistance.config.storageClass }}
+  resources:
+    requests:
+      storage: {{ .Values.persistance.config.storageSize }}
+        {{- end }}

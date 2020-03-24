@@ -1,0 +1,87 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "jellyfin.fullname" . }}
+  labels:
+  {{- include "jellyfin.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+  {{- include "jellyfin.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+    {{- include "jellyfin.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+      {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "jellyfin.serviceAccountName" . }}
+      securityContext:
+      {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+          {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: 8096
+              protocol: TCP
+          volumeMounts:
+            {{- if .Values.persistance.config.enabled }}
+            - mountPath: /config
+              name: config
+            {{- end }}
+            {{- if .Values.persistance.cache.enabled }}
+            - mountPath: /cache
+              name: cache
+            {{- end}}
+            {{- if .Values.media.hostPath }}
+            - mountPath: /media
+              name: media
+              readOnly: {{ .Values.media.readonly }}
+          {{- end}}
+          livenessProbe:
+            httpGet:
+              path: /web/index.html
+              port: http
+            initialDelaySeconds: 90
+          readinessProbe:
+            httpGet:
+              path: /web/index.html
+              port: http
+            initialDelaySeconds: 30
+          resources:
+      {{- toYaml .Values.resources | nindent 12 }}
+      volumes:
+        {{- if .Values.media.hostPath }}
+        - name: media
+          hostPath:
+            path: {{ .Values.media.hostPath }}
+        {{- end}}
+        {{- if .Values.persistance.cache.enabled }}
+        - name: cache
+          persistentVolumeClaim:
+            claimName: "{{ include "jellyfin.fullname" . }}-cache"
+        {{- end}}
+        {{- if .Values.persistance.cache.enabled }}
+        - name: config
+          persistentVolumeClaim:
+            claimName: "{{ include "jellyfin.fullname" . }}-config"
+        {{- end}}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+      {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+      {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+  {{- toYaml . | nindent 8 }}
+  {{- end }}
